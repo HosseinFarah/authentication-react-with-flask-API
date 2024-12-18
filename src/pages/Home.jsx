@@ -7,6 +7,7 @@ import { AuthContext } from "../context/AuthContext";
 const Home = () => {
   const { isAuthenticated } = useContext(AuthContext);
   console.log('isAuthenticated:', isAuthenticated); // Debug log
+  
 
   return (
     <>

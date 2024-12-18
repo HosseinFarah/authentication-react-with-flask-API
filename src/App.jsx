@@ -4,7 +4,9 @@ import Home from './pages/Home';
 import Todos from './pages/Todos';
 import HandleTodo from './Components/HandleTodo';
 import NotFound from './pages/NotFound';
-import Login from './pages/login';
+import Login from './pages/Login';
+import ResendConfirmation from './pages/ResendConfirmation';
+import Confirm from './pages/confirm';
 import { AuthProvider } from './context/AuthContext';
 import PrivateRoute from './Components/PrivateRoute';
 
@@ -16,6 +18,8 @@ function App() {
         <Route path="todos" element={<PrivateRoute><Todos /></PrivateRoute>} />
         <Route path="newtodo" element={<PrivateRoute><HandleTodo /></PrivateRoute>} />
         <Route path="login" element={<Login />} />
+        <Route path="resend-confirmation" element={<ResendConfirmation />} />
+        <Route path="confirm" element={<Confirm />} />
         <Route path="*" element={<NotFound />} />
       </Route>
     )

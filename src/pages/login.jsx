@@ -5,34 +5,24 @@ import { useEffect, useState, useContext } from 'react';
 import { PacmanLoader } from 'react-spinners';
 import { AuthContext } from '../context/AuthContext';
 import { API_URL } from '../Components/Urls';
+import { fetchCsrfToken } from '../utils/csrfUtils';
 
 const Login = () => {
     const { register, handleSubmit, formState: { errors } } = useForm();
     const navigate = useNavigate();
-    const { setAuth } = useContext(AuthContext);
+    const { setAuth, setIsConfirmed, setAdmin, setUser } = useContext(AuthContext);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
 
     useEffect(() => {
-        fetch(`${API_URL}/csrf-token`, {
-            credentials: 'include' // Include credentials in the request
-        })
-            .then(response => {
-                console.log('CSRF Token Response:', response); // Log the response
-                if (response.redirected) {
-                    console.error('CSRF Token request was redirected to:', response.url);
-                    throw new Error('User is not confirmed. Please confirm your email.');
-                }
-                return response.json();
-            })
-            .then(data => {
-                console.log('CSRF Token Data:', data); // Log the data
-                sessionStorage.setItem('csrf_token', data.csrf_token);
-            })
-            .catch(err => {
-                console.error('Failed to fetch CSRF token', err);
+        const fetchToken = async () => {
+            try {
+                await fetchCsrfToken();
+            } catch (err) {
                 setError(err.message);
-            });
+            }
+        };
+        fetchToken();
     }, []);
 
     const onSubmit = async (data) => {
@@ -40,8 +30,11 @@ const Login = () => {
         setError('');
         try {
             const csrfToken = sessionStorage.getItem('csrf_token');
-            console.log('CSRF Token:', csrfToken); // Log CSRF token
-            console.log('Login Data:', data); // Log login data
+            if (!csrfToken) {
+                throw new Error('CSRF token is missing');
+            }
+            console.log('CSRF Token:', csrfToken);
+            console.log('Login Data:', data);
             const response = await fetch(`${API_URL}/login`, {
                 method: 'POST',
                 headers: {
@@ -49,21 +42,70 @@ const Login = () => {
                     'X-CSRFToken': csrfToken
                 },
                 body: JSON.stringify(data),
-                credentials: 'include' // Include credentials in the request
+                credentials: 'include'
             });
 
             const result = await response.json();
-            console.log('Server Response:', result); // Log server response
+            console.log('Server Response:', result);
             if (response.ok) {
                 sessionStorage.setItem('authTokens', JSON.stringify(result.authTokens));
                 setAuth(true);
-                navigate('/');
+                setAdmin(result.admin);
+                if (result.user) {
+                    console.log('User Data:', result.user); // Debug log for user data
+                    setUser(result.user); // Set the logged-in user data
+                } else {
+                    console.error('User data is missing in the response');
+                }
+
+                if (result.admin) {
+                    console.log('Logged in user is an admin.');
+                } else {
+                    console.log('Logged in user is a regular user.');
+                }
+
+                fetch(`${API_URL}/confirmation-status`, {
+                    credentials: 'include'
+                })
+                    .then(response => {
+                        console.log('Confirmation Status Response:', response);
+                        if (response.status === 401) {
+                            return response.json().then(data => {
+                                console.log('401 Response Data:', data);
+                                if (data.redirect) {
+                                    navigate('/confirm');
+                                }
+                                throw new Error(data.message);
+                            });
+                        }
+                        if (response.ok) {
+                            return response.json();
+                        } else {
+                            throw new Error('User is not confirmed. Please confirm your email.');
+                        }
+                    })
+                    .then(data => {
+                        const isConfirmed = data.is_confirmed;
+                        setIsConfirmed(isConfirmed);
+                        sessionStorage.setItem('isConfirmed', JSON.stringify(isConfirmed));
+                        if (isConfirmed) {
+                            toast.success('Login successful');
+                            navigate('/');
+                        } else {
+                            toast.error('User is not confirmed. Please confirm your email.');
+                            navigate('/confirm');
+                        }
+                    })
+                    .catch(err => {
+                        console.error('Failed to fetch confirmation status after login', err);
+                        setError(err.message);
+                    });
             } else {
                 setError(result.message);
             }
         } catch (err) {
-            console.error('Login Error:', err); // Log the error
-            setError('An error occurred. Please try again.');
+            console.error('Login Error:', err);
+            setError(err.message || 'An error occurred. Please try again.');
         } finally {
             setLoading(false);
         }
