@@ -48,7 +48,11 @@ const Login = () => {
             const result = await response.json();
             console.log('Server Response:', result);
             if (response.ok) {
-                sessionStorage.setItem('authTokens', JSON.stringify(result.authTokens));
+                if (data.remember) {
+                    localStorage.setItem('authTokens', JSON.stringify(result.authTokens));
+                } else {
+                    sessionStorage.setItem('authTokens', JSON.stringify(result.authTokens));
+                }
                 setAuth(true);
                 setAdmin(result.admin);
                 if (result.user) {
@@ -64,42 +68,15 @@ const Login = () => {
                     console.log('Logged in user is a regular user.');
                 }
 
-                fetch(`${API_URL}/confirmation-status`, {
-                    credentials: 'include'
-                })
-                    .then(response => {
-                        console.log('Confirmation Status Response:', response);
-                        if (response.status === 401) {
-                            return response.json().then(data => {
-                                console.log('401 Response Data:', data);
-                                if (data.redirect) {
-                                    navigate('/confirm');
-                                }
-                                throw new Error(data.message);
-                            });
-                        }
-                        if (response.ok) {
-                            return response.json();
-                        } else {
-                            throw new Error('User is not confirmed. Please confirm your email.');
-                        }
-                    })
-                    .then(data => {
-                        const isConfirmed = data.is_confirmed;
-                        setIsConfirmed(isConfirmed);
-                        sessionStorage.setItem('isConfirmed', JSON.stringify(isConfirmed));
-                        if (isConfirmed) {
-                            toast.success('Login successful');
-                            navigate('/');
-                        } else {
-                            toast.error('User is not confirmed. Please confirm your email.');
-                            navigate('/confirm');
-                        }
-                    })
-                    .catch(err => {
-                        console.error('Failed to fetch confirmation status after login', err);
-                        setError(err.message);
-                    });
+                setIsConfirmed(result.confirmed);
+                sessionStorage.setItem('isConfirmed', JSON.stringify(result.confirmed));
+                if (result.confirmed) {
+                    toast.success('Login successful');
+                    navigate('/');
+                } else {
+                    toast.error('User is not confirmed. Please confirm your email.');
+                    navigate('/confirm');
+                }
             } else {
                 setError(result.message);
             }
@@ -126,6 +103,10 @@ const Login = () => {
                             <label className='form-label' htmlFor="password">Password</label>
                             <input type="password" {...register('password', { required: 'Password is required' })} style={{ width: '100%', padding: '0.5rem', marginTop: '0.5rem' }} />
                             {errors.password && <p style={{ color: 'red' }}>{errors.password.message}</p>}
+                        </div>
+                        <div style={{ marginBottom: '1rem' }}>
+                            <input type="checkbox" {...register('remember')} style={{ marginLeft: '0.5rem' }} />
+                            <label className='form-label ms-1' htmlFor="remember">Remember Me</label>
                         </div>
                         <button type="submit" disabled={loading} className='btn btn-primary' style={{ padding: '0.5rem 2rem' }}>
                             {loading ? <PacmanLoader color='white' size={10} /> : 'Login'}
