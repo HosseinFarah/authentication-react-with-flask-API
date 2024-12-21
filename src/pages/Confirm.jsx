@@ -30,7 +30,6 @@ const Confirm = () => {
     }
   }, [user, navigate]);
 
-
   const handleResendConfirmation = async () => {
     setLoading(true);
     setError('');

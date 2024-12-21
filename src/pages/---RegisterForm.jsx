@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom"; // Import useNavigate
 import { API_URL } from "../Components/Urls";
 import { getCsrfToken } from "../utils/csrfUtils";
 
@@ -10,9 +11,12 @@ const RegisterForm = () => {
     handleSubmit,
     formState: { errors },
     watch,
+    setError,
+    reset,
   } = useForm();
   const [cities, setCities] = useState([]);
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate(); // Initialize navigate
 
   useEffect(() => {
     const fetchCities = async () => {
@@ -50,9 +54,17 @@ const RegisterForm = () => {
 
       const result = await response.json();
       if (response.ok) {
-        toast.success(result.message);
+        toast.success("Registration successful. Please check your email to confirm your account.");
+        reset(); // Reset form fields
+        navigate("/login"); // Correct navigate function call
       } else {
-        toast.error(result.message);
+        if (result.errors) {
+          Object.keys(result.errors).forEach((key) => {
+            setError(key, { type: "server", message: result.errors[key][0] });
+          });
+        } else {
+          toast.error(result.message);
+        }
       }
     } catch (error) {
       console.error("Registration error:", error);
@@ -103,6 +115,9 @@ const RegisterForm = () => {
                   <p className="text-danger">{errors.email.message}</p>
                 )}
               </div>
+              {errors.email && errors.email.type === "server" && (
+                <p className="text-danger">{errors.email.message}</p>
+              )}
               <div className="form-group">
                 <label>Password</label>
                 <input
@@ -170,6 +185,7 @@ const RegisterForm = () => {
                   {...register("city", { required: "City is required" })}
                   className="form-control"
                 >
+                  <option value="">Select a city</option> {/* Add default option */}
                   {cities.map((city) => (
                     <option key={city} value={city}>
                       {city}

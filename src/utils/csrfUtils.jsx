@@ -5,6 +5,9 @@ export const fetchCsrfToken = async () => {
   try {
     const response = await fetch(`${API_URL}/csrf-token`, {
       method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'
+      },
       credentials: 'include' // Ensure credentials are included
     });
     console.log('CSRF Token Response:', response);
@@ -48,6 +51,8 @@ export const resendConfirmationEmail = async (email, navigate, logout) => {
       logout();
     } else if (response.status === 401) {
       navigate('/login');
+    } else if (response.status === 302) {
+      window.location.href = response.url; // Handle redirect
     } else {
       throw new Error(result.message);
     }
@@ -64,4 +69,35 @@ export const getCsrfToken = async () => {
     csrfToken = sessionStorage.getItem('csrf_token');
   }
   return csrfToken;
+};
+
+export const registerUser = async (userData) => {
+  try {
+    const csrfToken = await getCsrfToken();
+    const formData = new FormData();
+    for (const key in userData) {
+      formData.append(key, userData[key]);
+    }
+    const response = await fetch(`${API_URL}/register`, {
+      method: 'POST',
+      headers: {
+        'X-CSRFToken': csrfToken,
+      },
+      credentials: 'include',
+      body: formData // Send form data as FormData
+    });
+
+    const result = await response.json();
+    console.log('Register User Response:', response);
+    console.log('Register User Result:', result);
+    if (response.ok) {
+      toast.success('Registration successful. A confirmation email has been sent.');
+      return result;
+    } else {
+      throw new Error(result.message || 'Registration failed');
+    }
+  } catch (err) {
+    console.error('Error registering user:', err);
+    throw new Error(err.message || 'An error occurred. Please try again.');
+  }
 };

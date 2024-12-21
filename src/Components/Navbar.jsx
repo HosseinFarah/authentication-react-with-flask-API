@@ -5,7 +5,7 @@ import { useContext } from "react";
 import { AuthContext } from "../context/AuthContext";
 
 const Navbar = () => {
-  const { isAuthenticated, logout } = useContext(AuthContext);
+  const { isAuthenticated, logout,isAdmin } = useContext(AuthContext);
 
   return (
     <>
@@ -55,11 +55,13 @@ const Navbar = () => {
                 </NavLink>
               </li>
               ): null}  
+              {isAdmin ? (
               <li className="nav-item">
                 <NavLink className="nav-link" to="/newtodo">
                   New Todo
                 </NavLink>
               </li>
+              ): null}
             </ul>
             <ul className="navbar-nav ms-auto">
               {isAuthenticated ? (
@@ -69,11 +71,18 @@ const Navbar = () => {
                   </button>
                 </li>
               ) : (
+                <>
                 <li className="nav-item">
                   <NavLink className="nav-link" to="/login">
                     Login
                   </NavLink>
                 </li>
+                <li className="nav-item">
+                  <NavLink className="nav-link" to="/register">
+                    Register
+                  </NavLink>
+                </li>
+                </>
               )}
             </ul>
           </div>

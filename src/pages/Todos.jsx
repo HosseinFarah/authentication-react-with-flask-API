@@ -7,8 +7,10 @@ import { FaEdit,FaTrashAlt } from "react-icons/fa";
 import { useLocation } from "react-router-dom";
 import HandleTodo from "../Components/HandleTodo";
 import {JSON_URL} from "../Components/Urls";
+import {useAuth} from "../context/AuthContext";
 
 const Todos = ({isHome=false}) => {
+  const {isAdmin} = useAuth();
   const [todoList, setTodoList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedTodo, setSelectedTodo] = useState(null);
@@ -72,8 +74,11 @@ const Todos = ({isHome=false}) => {
                   <p>{todo.status ? todo.status : "No Status"}</p>
                 </div>
                 <div className="card-footer">
+                  { isAdmin ? <>
                   <FaEdit className="text-success ms-2 float-end" onClick={() => editTodoHandler(todo)} />
                   <FaTrashAlt className="text-danger float-end ms-3" onClick={() => deleteTodoHandler(todo.id)} />
+                    </> : null}
+
                   </div>
               </div>
             </div>
