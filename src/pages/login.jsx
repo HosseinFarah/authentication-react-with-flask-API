@@ -15,6 +15,7 @@ const Login = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [token, setToken] = useState(null); // Add state for token
+    const [message, setMessage] = useState(null); // Add state for message
 
     useEffect(() => {
         const fetchToken = async () => {
@@ -30,6 +31,8 @@ const Login = () => {
     useEffect(() => {
         const tokenFromUrl = new URLSearchParams(location.search).get('token'); // Extract token from URL
         setToken(tokenFromUrl); // Store token in state
+        const messageFromUrl = new URLSearchParams(location.search).get('message'); // Extract message from URL
+        setMessage(messageFromUrl); // Store message in state
     }, [location.search]);
 
     const onSubmit = async (data) => {
@@ -84,7 +87,12 @@ const Login = () => {
                     navigate('/confirm');
                 }
             } else {
-                setError(result.message);
+                if (result.message === 'Invalid or expired token, please login again and request a new confirmation email') {
+                    toast.error(result.message);
+                    navigate('/login'); // Rerender the login form
+                } else {
+                    setError(result.message);
+                }
             }
         } catch (err) {
             console.error('Login Error:', err);
@@ -99,6 +107,7 @@ const Login = () => {
             <div className="row d-flex justify-content-center">
                 <div className="col-md-4">
                     <h2>Login</h2>
+                    {message && <p style={{ color: 'red' }}>{message}</p>} {/* Display message */}
                     <form onSubmit={handleSubmit(onSubmit)} className='form-group'>
                         <div style={{ marginBottom: '1rem' }}>
                             <label htmlFor="email" className='form-label'>Email</label>

@@ -52,7 +52,11 @@ export const resendConfirmationEmail = async (email, navigate, logout, token = n
     } else if (response.status === 401) {
       navigate('/login');
     } else if (response.status === 302) {
-      window.location.href = response.url; // Handle redirect
+      navigate(response.url); // Handle redirect
+    } else if (response.status === 400 && result.message === 'Invalid or expired token, please login again and request a new confirmation email') {
+      console.log('Condition met: Invalid or expired token');
+      toast.error('Invalid or expired token. Please login again and request a new confirmation email.');
+      navigate('/');
     } else {
       throw new Error(result.message);
     }
