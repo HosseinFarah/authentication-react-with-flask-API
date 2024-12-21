@@ -130,8 +130,8 @@ const HandleTodo = ({ todo, fetchTodoList, setSelectedTodo }) => {
               >
                 Cancel
               </button>
-              <button type="button" className="btn btn-warning mt-3 me-3 float-end" onClick={() => navigate('/todos')}>
-                Back to Todos
+              <button type="button" className="btn btn-warning mt-3 me-3 float-end" onClick={() => navigate('/')}>
+                <i className="fas fa-home"></i>
               </button>
             </form>
           </div>

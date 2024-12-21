@@ -1,5 +1,5 @@
 import { useForm } from 'react-hook-form';
-import { useNavigate, useLocation } from 'react-router-dom'; // Import useLocation
+import { useNavigate, useLocation,Link } from 'react-router-dom'; // Import useLocation
 import { toast } from 'react-toastify';
 import { useEffect, useState, useContext } from 'react';
 import { PacmanLoader } from 'react-spinners';
@@ -109,25 +109,32 @@ const Login = () => {
                     <h2>Login</h2>
                     {message && <p style={{ color: 'red' }}>{message}</p>} {/* Display message */}
                     <form onSubmit={handleSubmit(onSubmit)} className='form-group'>
-                        <div style={{ marginBottom: '1rem' }}>
+                        <div className='form-group'>
                             <label htmlFor="email" className='form-label'>Email</label>
-                            <input type="email" {...register('email', { required: 'Email is required' })} style={{ width: '100%', padding: '0.5rem', marginTop: '0.5rem' }} />
+                            <input type="email" {...register('email', { required: 'Email is required' })} className='form-control'/>
                             {errors.email && <p style={{ color: 'red' }}>{errors.email.message}</p>}
                         </div>
-                        <div style={{ marginBottom: '1rem' }}>
+                        <div className='form-group'>
                             <label className='form-label' htmlFor="password">Password</label>
-                            <input type="password" {...register('password', { required: 'Password is required' })} style={{ width: '100%', padding: '0.5rem', marginTop: '0.5rem' }} />
+                            <input type="password" {...register('password', { required: 'Password is required' })} className='form-control'/>
                             {errors.password && <p style={{ color: 'red' }}>{errors.password.message}</p>}
                         </div>
-                        <div style={{ marginBottom: '1rem' }}>
-                            <input type="checkbox" {...register('remember')} style={{ marginLeft: '0.5rem' }} />
+                        <div className='form-group'>
+                            <input type="checkbox" {...register('remember')} className='form-check-input' id="remember"/>
                             <label className='form-label ms-1' htmlFor="remember">Remember Me</label>
                         </div>
-                        <button type="submit" disabled={loading} className='btn btn-primary' style={{ padding: '0.5rem 2rem' }}>
-                            {loading ? <PacmanLoader color='white' size={10} /> : 'Login'}
-                        </button>
+                        <div className='ms-auto d-flex justify-content-end'>
+                            <button type="submit" className='btn btn-primary' disabled={loading}>
+                                {loading ? <PacmanLoader color='white' size={10}/> : 'Login'}
+                            </button>
+
+                        </div>
                         {error && <p style={{ color: 'red', marginTop: '1rem' }}>{error}</p>}
                     </form>
+                    <div className='mt-3'>
+                        <p><i className="fas fa-user-plus"></i> Don't have an account? <Link to="/register">Register </Link></p>
+                        <p><i className="fas fa-key"></i> Forgot your password? <Link to="/reset_password_request">Reset Password </Link></p>
+                    </div>
                 </div>
             </div>
         </div>

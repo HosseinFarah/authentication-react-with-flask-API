@@ -14,3 +14,8 @@ export const AdminRoute = ({ children }) => {
     return isAdmin ? children : <Navigate to="*" />;
 };
 
+export const UnLogedInRoute = ({ children }) => {
+    const { isAuthenticated } = useContext(AuthContext);
+
+    return isAuthenticated ? <Navigate to="/" /> : children;
+}
