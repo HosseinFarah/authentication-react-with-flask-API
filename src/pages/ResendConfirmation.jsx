@@ -32,8 +32,9 @@ const ResendConfirmation = () => {
         setLoading(true);
         setError('');
         try {
+            const token = new URLSearchParams(window.location.search).get('token');
             await fetchCsrfToken();
-            await resendConfirmationEmail(email, navigate, logout); // Pass logout as an argument
+            await resendConfirmationEmail(email, navigate, logout, token); // Pass token as an argument
         } catch (err) {
             setError(err.message);
         } finally {

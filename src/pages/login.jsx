@@ -1,5 +1,5 @@
 import { useForm } from 'react-hook-form';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom'; // Import useLocation
 import { toast } from 'react-toastify';
 import { useEffect, useState, useContext } from 'react';
 import { PacmanLoader } from 'react-spinners';
@@ -10,9 +10,11 @@ import { fetchCsrfToken } from '../utils/csrfUtils';
 const Login = () => {
     const { register, handleSubmit, formState: { errors } } = useForm();
     const navigate = useNavigate();
+    const location = useLocation(); // Use useLocation to get the current URL
     const { setAuth, setIsConfirmed, setAdmin, setUser } = useContext(AuthContext);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
+    const [token, setToken] = useState(null); // Add state for token
 
     useEffect(() => {
         const fetchToken = async () => {
@@ -25,6 +27,11 @@ const Login = () => {
         fetchToken();
     }, []);
 
+    useEffect(() => {
+        const tokenFromUrl = new URLSearchParams(location.search).get('token'); // Extract token from URL
+        setToken(tokenFromUrl); // Store token in state
+    }, [location.search]);
+
     const onSubmit = async (data) => {
         setLoading(true);
         setError('');
@@ -33,15 +40,14 @@ const Login = () => {
             if (!csrfToken) {
                 throw new Error('CSRF token is missing');
             }
-            console.log('CSRF Token:', csrfToken);
-            console.log('Login Data:', data);
+            console.log('Token:', token); // Debug log for token
             const response = await fetch(`${API_URL}/login`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'X-CSRFToken': csrfToken
                 },
-                body: JSON.stringify(data),
+                body: JSON.stringify({ ...data, token }), // Include token in the request body
                 credentials: 'include'
             });
 

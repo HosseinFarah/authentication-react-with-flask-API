@@ -7,6 +7,7 @@ import { useAuth } from '../context/AuthContext';
 const Confirm = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [token, setToken] = useState(null); // Add state for token
   const navigate = useNavigate();
   const location = useLocation();
   const { setAuthConfirm, user, logout } = useAuth(); // Destructure logout from useAuth
@@ -25,16 +26,21 @@ const Confirm = () => {
   }, [setAuthConfirm]);
 
   useEffect(() => {
+    const tokenFromUrl = new URLSearchParams(location.search).get('token'); // Extract token from URL
+    setToken(tokenFromUrl); // Store token in state
+  }, [location.search]);
+
+  useEffect(() => {
     if (!user) {
-      navigate('/login'); // Navigate to login page if user is not authenticated
+      navigate(`/login?token=${token}`); // Pass token to login page
     }
-  }, [user, navigate]);
+  }, [user, navigate, token]);
 
   const handleResendConfirmation = async () => {
     setLoading(true);
     setError('');
     try {
-      await resendConfirmationEmail(user, navigate, logout); // Pass logout as an argument
+      await resendConfirmationEmail(user, navigate, logout, token); // Use token from state
     } catch (err) {
       setError(err.message);
     } finally {

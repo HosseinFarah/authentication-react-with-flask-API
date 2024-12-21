@@ -27,7 +27,7 @@ export const fetchCsrfToken = async () => {
   }
 };
 
-export const resendConfirmationEmail = async (email, navigate, logout) => {
+export const resendConfirmationEmail = async (email, navigate, logout, token = null) => {
   try {
     const csrfToken = sessionStorage.getItem('csrf_token');
     if (!csrfToken) {
@@ -40,7 +40,7 @@ export const resendConfirmationEmail = async (email, navigate, logout) => {
         'X-CSRFToken': csrfToken,
       },
       credentials: 'include',
-      body: JSON.stringify({ email })
+      body: JSON.stringify({ email, token }) // Include token in the request body
     });
 
     const result = await response.json();

@@ -23,6 +23,7 @@ function App() {
         <Route path="register" element={<RegisterForm />} />
         <Route path="resend-confirmation" element={<ResendConfirmation />} />
         <Route path="confirm" element={<Confirm />} />
+        <Route path="confirm/:token" element={<Confirm />} />
         <Route path="*" element={<NotFound />} />
       </Route>
     )
